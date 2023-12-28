@@ -1,0 +1,28 @@
+- name: Configure server for Timemachine
+  hosts: all
+  become: true
+  vars_files:
+    - variables.yml
+  tasks:
+
+  - name: Install Packages
+    ansible.builtin.apt:
+      name: sysstat, samba, avahi-daemon
+      state: latest
+
+  - name: Mount NVME
+    ansible.posix.mount:
+      path: /mnt/timemachine
+      backup: yes
+      passno: 2
+      fstype: ext4
+      opts: defaults,noatime,nofail
+      src: PARTUUID=ba11c409-4ee5-4112-8904-2ec54ae708d0 
+      state: mounted
+
+  - name: Create Samba Account
+    shell: "printf '{{ item.passwd }}\n{{ item.passwd }}\n' | smbpasswd -a {{ item.name }}"
+    with_items:
+    - "{{ users }}"
+    tags: smbpasswd
+
