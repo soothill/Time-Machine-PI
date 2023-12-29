@@ -1,3 +1,5 @@
+# code: language=ansible
+
 - name: Configure server for Timemachine
   hosts: all
   become: true
